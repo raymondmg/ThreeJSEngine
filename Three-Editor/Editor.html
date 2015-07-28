@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>EditorDemo</title>
+		<meta charset="utf-8">
+		<style>
+	
+		</style>
+	</head>
+	<body>
+		<div id="ModelDrogInput">Import Model</div>
+		<!-- 容器层放置3D显示 -->
+		<div id="container"></div>
+		<!--引入js文件-->
+		<script src="js/build/three.js"></script>
+		<script src="js/controls/TransformControls.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+		<script src="js/Detector.js"></script>
+		<script src="js/loaders/OBJLoader.js"></script>
+		<script>
+			//检测是否支持webgl
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+			
+			
+			var camera, scene, renderer, CamControl,ObjControl,container;
+			var windowWidth, windowHeight;
+			var mouseX = 0, mouseY = 0;
+			
+			
+			//预设自定义视窗 
+			var views = [
+				{
+					left: 0,
+					bottom: 0,
+					width: 1.0,
+					height: 1.0,
+					background: new THREE.Color().setRGB( 0.5, 0.5, 0.7 ),
+					eye: [ 1000	, 500, 1000 ],
+					up: [ 0, 1, 0 ],
+					fov: 70,
+					updateCamera: function ( camera, scene, mouseX, mouseY ) {
+					  camera.position.x += mouseX * 0.05;
+					  camera.position.x = Math.max( Math.min( camera.position.x, 2000 ), -2000 );
+					  camera.lookAt( scene.position );
+					}
+				},
+				{ 
+					left: 0.0,
+					bottom: 0.8,
+					width: 0.2,
+					height: 0.2,
+					background: new THREE.Color().setRGB( 0.7, 0.5, 0.5 ),
+					eye: [ 0, 1800, 0 ],
+					up: [ 0, 0, 1 ],
+					fov: 45,
+					updateCamera: function ( camera, scene, mouseX, mouseY ) {
+					  camera.position.x -= mouseX * 0.05;
+					  camera.position.x = Math.max( Math.min( camera.position.x, 2000 ), -2000 );
+					  camera.lookAt( camera.position.clone().setY( 0 ) );
+					}
+				},
+				{ 
+					left: 0.2,
+					bottom: 0.8,
+					width: 0.2,
+					height: 0.2,
+					background: new THREE.Color().setRGB( 0.5, 0.7, 0.7 ),
+					eye: [ 1400, 800, 1400 ],
+					up: [ 0, 1, 0 ],
+					fov: 60,
+					updateCamera: function ( camera, scene, mouseX, mouseY ) {
+					  camera.position.y -= mouseX * 0.05;
+					  camera.position.y = Math.max( Math.min( camera.position.y, 1600 ), -1600 );
+					  camera.lookAt( scene.position );
+					}
+				}
+			];
+			
+			init();
+			animate();
+
+			function init() {
+				container = document.getElementById( 'container' );
+			
+				scene = new THREE.Scene();
+				scene.add( new THREE.GridHelper( 500, 100 ) );
+
+				var light = new THREE.DirectionalLight( 0xffffff, 2 );
+				light.position.set( 1, 1, 1 );
+				scene.add( light );
+
+				//根据多视口的配置信息生成相机
+				for (var ii =  0; ii < views.length; ++ii ) {
+
+					var view = views[ii];
+					camera = new THREE.PerspectiveCamera( view.fov, window.innerWidth / window.innerHeight, 1, 10000 );
+					camera.position.x = view.eye[ 0 ];
+					camera.position.y = view.eye[ 1 ];
+					camera.position.z = view.eye[ 2 ];
+					camera.up.x = view.up[ 0 ];
+					camera.up.y = view.up[ 1 ];
+					camera.up.z = view.up[ 2 ];
+					view.camera = camera;
+				}
+				
+				//渲染场景
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+				
+				//生成模型贴图
+				var texture = THREE.ImageUtils.loadTexture( 'textures/crate.gif', THREE.UVMapping, render );
+				texture.anisotropy = renderer.getMaxAnisotropy();
+				//生成模型
+				var geometry = new THREE.BoxGeometry( 200, 200, 200 );
+				var material = new THREE.MeshLambertMaterial( { map: texture } );
+				/*
+				//载入模型贴图
+				//初始化读取管理类
+				var manager = new THREE.LoadingManager();
+				manager.onProgress = function ( item, loaded, total ) {
+					console.log( item, loaded, total );
+				};
+				//贴图
+				var texture = new THREE.Texture();
+				//进度显示
+				var onProgress = function ( xhr ) {
+					if ( xhr.lengthComputable ) {
+						var percentComplete = xhr.loaded / xhr.total * 100;
+						console.log( Math.round(percentComplete, 2) + '% downloaded' );
+					}
+				};
+				//读取错误
+				var onError = function ( xhr ) {
+				};
+				//初始化图片读取
+				var loader = new THREE.ImageLoader( manager );
+				loader.load( 'textures/UV_Grid_Sm.jpg', function ( image ) {
+
+					texture.image = image;
+					texture.needsUpdate = true;
+
+				} );
+				
+				// 载入模型
+				var loader = new THREE.OBJLoader( manager );
+				loader.load( 'obj/male02.obj', function ( object ) {
+					object.traverse( function ( child ) {
+						if ( child instanceof THREE.Mesh ) {
+							child.material.map = texture;
+						}
+					} );
+					object.position.y = - 80;
+					scene.add( object );
+				}, onProgress, onError );
+				*/
+				//添加操控物体的控制器
+				ObjControl = new THREE.TransformControls( views[0].camera, renderer.domElement );
+				ObjControl.addEventListener( 'change', render );
+				//将材质和模型合并成一个物体并添加进入场景
+				var mesh = new THREE.Mesh( geometry, material );
+				scene.add( mesh );
+				//将控制器脚本附在物体上
+				ObjControl.attach( mesh );
+				scene.add( ObjControl );
+				
+				//添加旋转缩放查看控制器
+				CamControl=new THREE.OrbitControls(views[0].camera,renderer.domElement);	
+				
+				
+				//添加事件监听
+				window.addEventListener( 'keydown', function ( event ) {
+		            switch ( event.keyCode ) {
+		              case 81: // Q   
+		                ObjControl.setSpace( ObjControl.space == "local" ? "world" : "local" );
+		                break;
+		              case 87: // W   平移
+		                ObjControl.setMode( "translate" );
+		                break;
+		              case 69: // E   旋转
+		                ObjControl.setMode( "rotate" );
+		                break;
+		              case 82: // R   放缩
+		                ObjControl.setMode( "scale" );
+		                break;
+					case 187:
+					case 107: // +,=,num+
+						ObjControl.setSize( ObjControl.size + 0.1 );
+						break;
+					case 189:
+					case 10: // -,_,num-
+						ObjControl.setSize( Math.max(ObjControl.size - 0.1, 0.1 ) );
+						break;
+		            }
+        		});
+				
+				//模型导入部分事件绑定
+				 var dropbox = document.getElementById("ModelDrogInput");  
+				dropbox.addEventListener("dragenter", dragenter, false);  
+				dropbox.addEventListener("dragover", dragover, false);  
+				dropbox.addEventListener("drop", drop, false);  
+					
+
+			}
+			
+			//更新大小
+			function updateSize() {
+
+				if ( windowWidth != window.innerWidth || windowHeight != window.innerHeight ) {
+
+					windowWidth  = window.innerWidth;
+					windowHeight = window.innerHeight;
+
+					renderer.setSize ( windowWidth, windowHeight );
+
+				}
+
+			}
+			//动画（屏幕显示内容）
+			function animate() {
+
+				render();
+				requestAnimationFrame( animate );
+			}	
+			//渲染
+			function render() {
+
+				updateSize();
+
+				for ( var ii = 0; ii < views.length; ++ii ) {
+
+					view = views[ii];
+					camera = view.camera;
+
+					view.updateCamera( camera, scene, mouseX, mouseY );
+
+					var left   = Math.floor( windowWidth  * view.left );
+					var bottom = Math.floor( windowHeight * view.bottom );
+					var width  = Math.floor( windowWidth  * view.width );
+					var height = Math.floor( windowHeight * view.height );
+					renderer.setViewport( left, bottom, width, height );
+					renderer.setScissor( left, bottom, width, height );
+					renderer.enableScissorTest ( true );
+					renderer.setClearColor( view.background );
+
+					camera.aspect = width / height;
+					camera.updateProjectionMatrix();
+
+					renderer.render( scene, camera );
+					
+					switch(ii)
+					{
+					case 0:
+						//场景相机更新
+						ObjControl.update();
+					break;
+					}
+				}
+
+			}
+				//读取模型
+				function loadModel(modelPath)
+				{
+				//载入模型贴图
+				//初始化读取管理类
+				var manager = new THREE.LoadingManager();
+				manager.onProgress = function ( item, loaded, total ) {
+					console.log( item, loaded, total );
+				};
+				//进度显示
+				var onProgress = function ( xhr ) {
+					if ( xhr.lengthComputable ) {
+						var percentComplete = xhr.loaded / xhr.total * 100;
+						console.log( Math.round(percentComplete, 2) + '% downloaded' );
+					}
+				};
+				//读取错误
+				var onError = function ( xhr ) {
+				};
+				
+				// 载入模型
+				var loader = new THREE.OBJLoader( manager );
+				loader.load( modelPath, function ( object ) {
+					object.position.y = - 80;
+					scene.add( object );
+				}, onProgress, onError );
+				
+				//载入完成
+				alert("Success!");
+				}
+	//拖拽进入
+	function dragenter(e) {  
+        e.stopPropagation();  
+        e.preventDefault();  
+    }  
+	//拖拽结束
+    function dragover(e) {  
+        e.stopPropagation();  
+        e.preventDefault();  
+    }
+	//释放鼠标拖拽
+    function drop(e) {
+        e.stopPropagation();  
+        e.preventDefault();   
+        var dt = e.dataTransfer;  
+        var files = dt.files;
+        if(files.length)
+        {
+		file=files[0];
+         var fr = new FileReader();
+				fr.onloadend = function(e) {
+					 loadModel(e.target.result);
+				};
+				fr.readAsDataURL(file);
+        }
+    }
+
+		</script>
+
+	</body>
+</html>
