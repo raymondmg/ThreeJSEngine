@@ -127,13 +127,13 @@
 				color:     { type: "c", value: new THREE.Color( 0xff0000 ) }
 
 			};
-
+				//document.getElementById( 'vertexshader' ).textContent
 			var shaderMaterial = new THREE.ShaderMaterial( {
 
 				uniforms:       uniforms,
 				attributes:     attributes,
-				vertexShader:   document.getElementById( 'vertexshader' ).textContent,
-				fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+				vertexShader:   "uniform float amplitude;attribute vec3 displacement;attribute vec3 customColor;varying vec3 vColor;void main() {vec3 newPosition = position + amplitude * displacement;vColor = customColor;gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );}",
+				fragmentShader: "uniform vec3 color;uniform float opacity;varying vec3 vColor;void main() {gl_FragColor = vec4( vColor * color, opacity );}",
 				blending:       THREE.AdditiveBlending,
 				depthTest:      false,
 				transparent:    true
@@ -224,7 +224,7 @@
 
 		function render() {
 
-			var time = Date.now() * 0.001;
+			/*var time = Date.now() * 0.001;
 
 			object.rotation.y = 0.25 * time;
 
@@ -247,7 +247,7 @@
 
 			}
 
-			attributes.displacement.needsUpdate = true;
+			attributes.displacement.needsUpdate = true;*/
 
 			renderer.render( scene, camera );
 

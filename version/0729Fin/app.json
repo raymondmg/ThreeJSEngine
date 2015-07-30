@@ -1,0 +1,121 @@
+{
+	"project": {
+		"vr": false
+	},
+	"camera": {
+		"metadata": {
+			"version": 4.3,
+			"type": "Object",
+			"generator": "ObjectExporter"
+		},
+		"object": {
+			"uuid": "CE3E986B-033A-4B10-94B6-4A09C89DCE69",
+			"type": "PerspectiveCamera",
+			"name": "Camera",
+			"fov": 50,
+			"aspect": 1.656441717791411,
+			"near": 0.1,
+			"far": 100000,
+			"matrix": [-0.7720012664794922,-1.0125231320046169e-8,-0.6356209516525269,0,-0.5052164196968079,0.6068201661109924,0.6136168241500854,0,0.3857076168060303,0.7948391437530518,-0.4684659540653229,0,866.1043701171875,1303.14453125,-632.2172241210938,1]
+		}
+	},
+	"scene": {
+		"metadata": {
+			"version": 4.3,
+			"type": "Object",
+			"generator": "ObjectExporter"
+		},
+		"materials": [
+			{
+				"uuid": "3487C949-9245-43EE-8E0D-197ED359F706",
+				"type": "SpriteMaterial",
+				"color": 16776960,
+				"opacity": 0.9
+			}],
+		"object": {
+			"uuid": "3741222A-BD8F-401C-A5D2-5A907E891896",
+			"type": "Scene",
+			"name": "Scene",
+			"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+			"children": [
+				{
+					"uuid": "8FE8943E-0448-4ADE-BD81-2EFFBF811C1C",
+					"type": "Group",
+					"name": "initScript",
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+				},
+				{
+					"uuid": "C1FE987E-56C1-46CE-9022-69D19439CBF7",
+					"type": "Group",
+					"name": "LightGroup",
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+					"children": [
+						{
+							"uuid": "84BF0A67-AF82-4820-B0A9-DF65A1BF329E",
+							"type": "PointLight",
+							"name": "PointLight 1",
+							"color": 16777215,
+							"intensity": 10.5,
+							"distance": 2.16,
+							"decay": 1,
+							"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,250,0,1]
+						}]
+				},
+				{
+					"uuid": "3F1BDAFF-5DCD-4677-AD31-797269B4B76C",
+					"type": "Group",
+					"name": "CameraGroup",
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+					"children": [
+						{
+							"uuid": "4D3387F8-051D-415A-AE6C-3DFCA6693CBD",
+							"type": "PerspectiveCamera",
+							"name": "PlayerCam",
+							"fov": 50,
+							"aspect": 1,
+							"near": 1,
+							"far": 50000,
+							"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,1000,1],
+							"children": [
+								{
+									"uuid": "38E25DB8-5F47-402F-9F8C-50365063CFE4",
+									"type": "Group",
+									"name": "ParticleSystem",
+									"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+									"children": [
+										{
+											"uuid": "3736B4D2-F495-4BCF-AC7E-39BD33E6CF51",
+											"type": "Sprite",
+											"name": "Particle",
+											"material": "3487C949-9245-43EE-8E0D-197ED359F706",
+											"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+										}]
+								}]
+						}]
+				}]
+		}
+	},
+	"scripts": {
+		"8FE8943E-0448-4ADE-BD81-2EFFBF811C1C": [
+			{
+				"name": "SkyBox",
+				"source": "\t// 天空盒\n\tvar imagePrefix = \"Resources/images/nebula-\";\n\tvar directions  = [\"xpos\", \"xneg\", \"ypos\", \"yneg\", \"zpos\", \"zneg\"];\n\tvar imageSuffix = \".png\";\n\tvar skyGeometry = new THREE.CubeGeometry( 50000, 50000, 50000 );\t\n\t\n\tvar materialArray = [];\n\tfor (var i = 0; i < 6; i++)\n\t\tmaterialArray.push( new THREE.MeshBasicMaterial({\n\t\t\tmap: THREE.ImageUtils.loadTexture( imagePrefix + directions[i] + imageSuffix ),\n\t\t\tside: THREE.BackSide\n\t\t}));\n\tvar skyMaterial = new THREE.MeshFaceMaterial( materialArray );\n\tvar skyBox = new THREE.Mesh( skyGeometry, skyMaterial );\n\tscene.add( skyBox );\n\n/*var light = new THREE.PointLight(0xffffff);\n\tlight.position.set(0,250,0);\n\tscene.add(light);\n\nvar floorTexture = new THREE.ImageUtils.loadTexture( 'Resources/images/checkerboard.jpg' );\n\tfloorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; \n\tfloorTexture.repeat.set( 10, 10 );\n\tvar floorMaterial = new THREE.MeshBasicMaterial( { color: 0x444444, map: floorTexture, side: THREE.DoubleSide } );\n\tvar floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);\n\tvar floor = new THREE.Mesh(floorGeometry, floorMaterial);\n\tfloor.position.y = -10.5;\n\tfloor.rotation.x = Math.PI / 2;\n\tscene.add(floor);\n\n\tvar skyBoxGeometry = new THREE.CubeGeometry( 4000, 4000, 4000 );\n\tvar skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, side: THREE.BackSide } );\n\tvar skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );\n    scene.add(skyBox);*/"
+			}],
+		"4D3387F8-051D-415A-AE6C-3DFCA6693CBD": [
+			{
+				"name": "playerCam",
+				"source": "var camera=this;\nplayer.setCamera(camera);\n"
+			}],
+		"84BF0A67-AF82-4820-B0A9-DF65A1BF329E": [
+			{
+				"name": "LightInit",
+				"source": "this.position.set(0,250,0);"
+			}],
+		"3F1BDAFF-5DCD-4677-AD31-797269B4B76C": [
+			{
+				"name": "CameraOrbit",
+				"source": "var userCamera = this.getObjectByName( 'PlayerCam' );\nvar position=userCamera.position;\nvar windowHalfX = window.innerWidth / 2;\nvar windowHalfY = window.innerHeight / 2;\nvar mouseX = 0, mouseY = 0;\n\nvar particles = [],colors=[];\nvar original = this.getObjectByName( 'Particle' );\nvar sprite = THREE.ImageUtils.loadTexture( \"Resources/textures/sprites/ball.png\" );\n\n\nvar material = new THREE.PointCloudMaterial( { size: 185, map: sprite, vertexColors: THREE.VertexColors, alphaTest: 0.5, transparent: true } );\noriginal.material=material;\n\n//生成粒子\nmakeParticles();\n\n\n\n\n\n\n//鼠标移动\nfunction mousemove( event ) {\n\tmouseX = event.clientX - windowHalfX;\n\tmouseY = event.clientY - windowHalfY;\n}\n\n//屏幕触摸开始\nfunction touchstart( event ) {\n\nif ( event.touches.length === 1 ) {\n\nevent.preventDefault();\n\nmouseX = event.touches[ 0 ].pageX - windowHalfX;\nmouseY = event.touches[ 0 ].pageY - windowHalfY;\n\n}\n\n}\n//屏幕触摸移动\nfunction touchmove( event ) {\n\nif ( event.touches.length === 1 ) {\n\nevent.preventDefault();\n\nmouseX = event.touches[ 0 ].pageX - windowHalfX;\nmouseY = event.touches[ 0 ].pageY - windowHalfY;\n\n}\n\n}\n\n//相机更新渲染\nfunction update( event ) {\n\n\tvar time = Date.now() * 0.00005;\n\t\n\tposition.x += ( mouseX - position.x ) * 0.05;\n\tposition.y += ( - mouseY - position.y ) * 0.05;\n\tif(position.z>5000 ){\n       position.z=-5000;\n     }\n\telse if( position.z<-5000)\n\t {\n\t\t position.z=5000;\n\t }\n\telse\n\t {\n\t\tposition.z += Math.cos( time ) * 4;\n\t }\n\t\n\t\n\tuserCamera.lookAt( scene.position );\n\t//调用移动粒子的函数\n     updateParticles();\n\n}\n\n\n\n\n\n//生成粒子\nfunction makeParticles(){\n                 \n                var particle;\n\t\n                //粒子从Z轴产生区间在-1000到1000\n                for(var zpos=-10000;zpos<10000;zpos+=20){\n                    //生成粒子\n                    particle = original.clone();\n                    //随即产生x轴,y轴,区间值为-500-500\n                    particle.position.x = Math.random()*3000-500; //math . random()返回一个浮点数在0和1之间\n                    particle.position.y = Math.random()*3000-500;\n                    //设置z轴\n                    particle.position.z = zpos;\n                    //scale it up a bit\n                    particle.scale.x = particle.scale.y = 10;\n\t\t\t\t\t//颜色\n\t\t\t\t\tcolors[zpos] = new THREE.Color( 0xffffff );\n\t\t\t\t\tcolors[zpos].setHSL( ( Math.random()*1000+500 ) / 2000, 1, 0.5 );\n\t\t\t\t\tparticle.material.color=colors[zpos];\n                    //将产生的粒子添加到场景\n                    scene.add(particle);\n                    //将粒子位置的值保存到数组\n                    particles.push(particle);\n                }\n            }\n \n//定义粒子渲染器\nfunction particleRender( context ) {\n         \n\t //获取canvas上下文的引用\n     context.beginPath();\n     context.arc( 0, 0, 1, 0,  Math.PI * 2, true );\n     //设置原型填充\n     context.fill();\n}\n \n                 \n//移动粒子的函数\nfunction updateParticles(){\n                 \n                //遍历每个粒子\n                for(var i=0; i<particles.length; i++){\n                    particle = particles[i];\n                    //设置粒子向前移动的速度依赖于鼠标在平面Y轴上的距离\n                    particle.position.z += 7;\n                    //如果粒子Z轴位置到1000,将z轴位置设置到-1000\n                    if(particle.position.z>1000){\n                         particle.position.z-=2000;\n                    }\n                }\n}\n"
+			}],
+		"3741222A-BD8F-401C-A5D2-5A907E891896": []
+	}
+}
